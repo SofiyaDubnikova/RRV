@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Кто живёт твою жизнь? · Терапия Души</title>
+<meta property="og:title" content="Кто живёт твою жизнь — квиз по Терапии Души">
+<meta property="og:description" content="Родитель, Взрослый или Ребёнок? 7 вопросов, чтобы узнать, из какой позиции ты действуешь прямо сейчас. Бережный квиз по мотивам метода Гульназ Михалевой.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0b12;--bg2:#171019;
+  --ink:#f4ecf1;--muted:#b7a6b2;
+  --pink:#ff9ec7;--pink-deep:#e56ea1;
+  --line:rgba(255,158,199,.22);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:radial-gradient(120% 90% at 50% 0%,#1a1120 0%,var(--bg) 55%,#0a070d 100%);
+  background-attachment:fixed;color:var(--ink);
+  font-family:'Manrope',sans-serif;overflow-x:hidden;
+}
+::selection{background:var(--pink);color:#2a0f1c}
+
+/* ---- фон ---- */
+.ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.ambient span{position:absolute;opacity:.07;filter:blur(1px);animation:drift 16s ease-in-out infinite alternate}
+.ambient span:nth-child(1){left:8%;top:14%;font-size:26px;animation-duration:19s}
+.ambient span:nth-child(2){left:84%;top:20%;font-size:18px;animation-duration:14s;animation-delay:-4s}
+.ambient span:nth-child(3){left:70%;top:72%;font-size:30px;animation-duration:22s;animation-delay:-8s}
+.ambient span:nth-child(4){left:16%;top:78%;font-size:20px;animation-duration:17s;animation-delay:-2s}
+.ambient span:nth-child(5){left:46%;top:8%;font-size:16px;animation-duration:21s;animation-delay:-11s}
+@keyframes drift{from{transform:translate(0,0) rotate(-6deg)}to{transform:translate(22px,-34px) rotate(8deg)}}
+.noise{position:fixed;inset:0;z-index:3;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")}
+
+/* ---- сердечки ---- */
+.hearts{font-size:.85rem;letter-spacing:.45em;user-select:none;margin-bottom:26px}
+.hearts span{display:inline-block;animation:beat 5s ease-in-out infinite}
+.hearts span:nth-child(odd){animation-delay:.35s}
+@keyframes beat{0%,10%,100%{transform:scale(1)}5%{transform:scale(1.3)}}
+
+/* ---- экраны ---- */
+main{position:relative;z-index:1}
+.screen{display:none;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 22px 96px;text-align:center}
+.screen.active{display:flex;animation:screenIn .8s cubic-bezier(.22,1,.36,1) both}
+@keyframes screenIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+.overline{font-size:.68rem;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--pink);margin-bottom:18px}
+h1{font-family:'Cormorant',serif;font-weight:600;font-size:clamp(2.4rem,8.5vw,4.2rem);line-height:1.05;margin-bottom:22px}
+h2{font-family:'Cormorant',serif;font-weight:600;font-size:clamp(1.8rem,6vw,2.8rem);line-height:1.1;margin-bottom:16px}
+.lead{max-width:520px;color:var(--muted);font-size:1.02rem;line-height:1.7;margin-bottom:10px}
+.tiny{font-size:.78rem;color:var(--muted);opacity:.75;max-width:420px;line-height:1.6}
+em{font-family:'Cormorant',serif;font-style:italic;color:var(--pink)}
+
+.btn{display:inline-block;font-family:'Manrope',sans-serif;font-weight:700;font-size:.95rem;letter-spacing:.06em;
+  padding:16px 42px;border-radius:999px;cursor:pointer;text-decoration:none;
+  transition:transform .3s,box-shadow .3s,background .3s;
+  border:1px solid var(--pink);background:var(--pink);color:#2a0f1c;margin-top:30px}
+.btn:hover{transform:translateY(-3px);box-shadow:0 12px 34px rgba(255,158,199,.35)}
+.btn.ghost{background:transparent;color:var(--pink)}
+.btn.ghost:hover{background:rgba(255,158,199,.08)}
+
+/* ---- квиз ---- */
+.qp-bar{width:100%;max-width:480px;height:3px;background:var(--line);border-radius:2px;margin-bottom:36px;overflow:hidden}
+.qp-fill{height:100%;width:0;background:var(--pink);border-radius:2px;transition:width .6s ease}
+.qp-num{font-size:.72rem;font-weight:700;letter-spacing:.25em;text-transform:uppercase;color:var(--pink);margin-bottom:14px}
+
+#quizBody{transition:opacity .4s ease,transform .4s ease;max-width:560px;width:100%}
+#quizBody.out{opacity:0;transform:translateY(-18px)}
+
+.q-text{font-family:'Cormorant',serif;font-weight:600;font-size:clamp(1.35rem,4.8vw,2rem);line-height:1.25;margin-bottom:28px}
+.q-opts{display:flex;flex-direction:column;gap:12px;width:100%}
+.q-opt{text-align:left;padding:18px 22px;border:1px solid var(--line);border-radius:14px;
+  background:rgba(255,158,199,.03);color:var(--ink);font-family:'Manrope',sans-serif;
+  font-size:.92rem;line-height:1.55;cursor:pointer;
+  transition:border-color .3s,background .3s,transform .3s,opacity .3s,box-shadow .3s}
+.q-opt:hover{border-color:var(--pink);background:rgba(255,158,199,.08);transform:translateX(6px)}
+.q-opt.chosen{border-color:var(--pink);background:rgba(255,158,199,.16);box-shadow:0 0 24px rgba(255,158,199,.18)}
+.q-opt.dim{opacity:.25;pointer-events:none;transform:none}
+
+/* ---- результат ---- */
+.res-emoji{font-size:3.6rem;margin-bottom:12px;animation:popIn .7s cubic-bezier(.34,1.56,.64,1) both;animation-delay:.3s}
+@keyframes popIn{from{opacity:0;transform:scale(0)}to{opacity:1;transform:scale(1)}}
+.res-label{font-size:.68rem;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--pink);margin-bottom:10px}
+.res-text{max-width:540px;color:var(--muted);font-size:.95rem;line-height:1.75;margin-bottom:8px}
+.res-quote{font-family:'Cormorant',serif;font-style:italic;font-size:1.25rem;color:var(--pink);max-width:480px;margin:20px auto 0;line-height:1.4}
+
+.about-card{max-width:520px;margin:40px auto 0;padding:30px 26px;border:1px solid var(--line);
+  background:rgba(23,16,25,.6);text-align:left;position:relative}
+.about-card::before{content:'🩷';position:absolute;top:-13px;left:26px;background:var(--bg);padding:0 10px;font-size:.9rem}
+.about-card h3{font-family:'Cormorant',serif;font-size:1.7rem;font-weight:600;margin-bottom:8px}
+.about-card p{font-size:.88rem;color:var(--muted);line-height:1.65}
+.about-card .quote{margin-top:16px;font-family:'Cormorant',serif;font-style:italic;font-size:1.15rem;color:var(--pink)}
+
+.gifts-title{margin-top:48px;font-size:.68rem;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--pink)}
+.gifts{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;margin-top:22px;max-width:640px}
+.gift{width:290px;text-align:left;padding:24px;border:1px solid var(--line);
+  background:linear-gradient(160deg,#1e1421,#130d15);transition:transform .35s,border-color .35s,box-shadow .35s}
+.gift:hover{transform:translateY(-6px);border-color:var(--pink);box-shadow:0 16px 40px rgba(229,110,161,.18)}
+.gift .tag{font-size:.62rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--pink)}
+.gift h4{font-family:'Cormorant',serif;font-size:1.4rem;font-weight:600;margin:10px 0 8px}
+.gift p{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.gift a{font-size:.8rem;font-weight:700;letter-spacing:.08em;color:var(--pink);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+.gift a:hover{border-color:var(--pink)}
+
+.cta-block{margin-top:48px}
+.cta-block h2{margin-bottom:10px}
+.cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:26px}
+.cta-row .btn{margin-top:0}
+
+.share-row{margin-top:20px;display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap}
+.linklike{background:none;border:none;color:var(--pink);font-family:'Manrope',sans-serif;font-size:.82rem;
+  letter-spacing:.06em;cursor:pointer;border-bottom:1px dashed var(--line);padding-bottom:2px}
+.linklike:hover{border-color:var(--pink)}
+footer{margin-top:48px;font-size:.75rem;color:var(--muted);opacity:.7;letter-spacing:.14em}
+
+/* ---- служебное ---- */
+.progress{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:4;display:flex;gap:9px}
+.progress i{width:6px;height:6px;border-radius:50%;background:rgba(255,158,199,.2);transition:background .5s,transform .5s}
+.progress i.on{background:var(--pink);transform:scale(1.35)}
+#toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(20px);z-index:6;
+  background:var(--pink);color:#2a0f1c;font-weight:700;font-size:.82rem;padding:11px 26px;border-radius:999px;
+  opacity:0;pointer-events:none;transition:opacity .4s,transform .4s}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s!important;animation-delay:0s!important;transition-duration:.001s!important}
+}
+</style>
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true">
+  <span>🩷</span><span>🖤</span><span>🩷</span><span>🖤</span><span>🩷</span>
+</div>
+<div class="noise" aria-hidden="true"></div>
+<div class="progress" id="dots"><i></i><i></i><i></i></div>
+<div id="toast">Ссылка скопирована 🩷</div>
+
+<main>
+
+  <!-- ====== INTRO ====== -->
+  <section class="screen active" id="s-intro">
+    <div class="hearts" aria-hidden="true"><span>🖤</span><span>🖤</span><span>🩷</span><span>🖤</span><span>🩷</span><span>🖤</span><span>🖤</span><span>🩷</span><span>🖤</span><span>🩷</span></div>
+    <p class="overline">квиз · 2 минуты · 7 вопросов</p>
+    <h1>Кто сейчас живёт<br>твою жизнь?</h1>
+    <p class="lead">Внутри каждого из нас живут три голоса: <em>Родитель</em>, который знает, как надо. <em>Ребёнок</em>, который боится и подстраивается. И <em>Взрослый</em>, который выбирает свободно.</p>
+    <p class="lead">Какой из них управляет твоими решениями прямо сейчас?</p>
+    <p class="tiny">Без диагнозов и оценок. Только честные вопросы из обычной жизни.</p>
+    <button class="btn" id="startBtn">Узнать</button>
+    <p class="tiny" style="margin-top:34px">по мотивам метода <em>«Терапия Души»</em> · Гульназ Михалева</p>
+  </section>
+
+  <!-- ====== QUIZ ====== -->
+  <section class="screen" id="s-quiz">
+    <div class="qp-bar"><div class="qp-fill" id="qpFill"></div></div>
+    <div id="quizBody">
+      <p class="qp-num" id="qpNum"></p>
+      <p class="q-text" id="qText"></p>
+      <div class="q-opts" id="qOpts"></div>
+    </div>
+  </section>
+
+  <!-- ====== RESULT ====== -->
+  <section class="screen" id="s-result">
+    <div class="hearts" aria-hidden="true"><span>🖤</span><span>🖤</span><span>🩷</span><span>🖤</span><span>🩷</span><span>🖤</span><span>🖤</span><span>🩷</span><span>🖤</span><span>🩷</span></div>
+    <div class="res-emoji" id="resEmoji"></div>
+    <p class="res-label">твой результат</p>
+    <h2 id="resTitle"></h2>
+    <p class="res-text" id="resText"></p>
+    <p class="res-quote" id="resQuote"></p>
+
+    <div class="about-card">
+      <h3>Гульназ Михалева</h3>
+      <p>Терапевт метода «Терапия Души» (метод Евгения Теребенина) · сертифицированная ведущая динамической практики Кали-медитации · Красноярск</p>
+      <p class="quote">«Терапия Души — про правду, выбор, свободу и любовь.»</p>
+    </div>
+
+    <p class="gifts-title">Твой подарок за честность с собой</p>
+    <div class="gifts">
+      <div class="gift">
+        <span class="tag">гайд · pdf</span>
+        <h4>«Пять вопросов, чтобы встретиться с собой»</h4>
+        <p>Рабочий лист: выписать то, что ты тащишь, — и честно понять, чьё это на самом деле.</p>
+        <!-- TODO: заменить # на ссылку на гайд -->
+        <a href="#">Забрать гайд →</a>
+      </div>
+      <div class="gift">
+        <span class="tag">аудиопрактика · 10 минут</span>
+        <h4>«Пространство внутри»</h4>
+        <p>Практика голосом Гульназ: вернуться к себе, почувствовать опору и немного тишины.</p>
+        <!-- TODO: заменить # на ссылку на аудиопрактику -->
+        <a href="#">Слушать практику →</a>
+      </div>
+    </div>
+
+    <div class="cta-block">
+      <h2>Если откликается — <em>приходи</em>.</h2>
+      <p class="lead">Индивидуальные и групповые сессии онлайн и офлайн. Расскажу о форматах и подберём время.</p>
+      <div class="cta-row">
+        <a class="btn" href="https://t.me/gulnazrada" target="_blank" rel="noopener">Написать в Telegram</a>
+        <!-- TODO: заменить # на ссылку на MAX -->
+        <a class="btn ghost" href="#" target="_blank" rel="noopener">Написать в MAX</a>
+      </div>
+    </div>
+
+    <div class="share-row">
+      <button class="linklike" id="shareBtn">Поделиться результатом ↗</button>
+      <button class="linklike" onclick="location.reload()">пройти ещё раз</button>
+    </div>
+    <footer>#терапиядуши &nbsp;·&nbsp; #ГульназМихалева</footer>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ========== ДАННЫЕ ========== */
+  var Q = [
+    {
+      q: 'Тебе говорят, что ты неправа. Первая реакция внутри?',
+      opts: [
+        { t: '«Надо объяснить, как правильно, и поставить на место»', k: 'P' },
+        { t: '«Спокойно выслушаю и разберусь, в чём суть»', k: 'A' },
+        { t: '«Комок в горле, хочется спрятаться или расплакаться»', k: 'C' }
+      ]
+    },
+    {
+      q: 'На работе дали задачу, которую ты раньше не делала. Что внутри?',
+      opts: [
+        { t: '«Сразу знаю, как надо, и начинаю учить других»', k: 'P' },
+        { t: '«Оценю ресурсы, спрошу, что непонятно, и начну»', k: 'A' },
+        { t: '«Паника: а вдруг не справлюсь и все увидят?»', k: 'C' }
+      ]
+    },
+    {
+      q: 'Близкий человек расстроен. Что ты делаешь?',
+      opts: [
+        { t: '«Даю советы, объясняю, что делать и как жить»', k: 'P' },
+        { t: '«Спрашиваю, что ему сейчас нужно, и слушаю»', k: 'A' },
+        { t: '«Принимаю на свой счёт, чувствую вину»', k: 'C' }
+      ]
+    },
+    {
+      q: 'Ты допустила ошибку. Что звучит в голове?',
+      opts: [
+        { t: '«Как можно было так облажаться? Соберись!»', k: 'P' },
+        { t: '«Окей, что именно пошло не так и как это исправить?»', k: 'A' },
+        { t: '«Я всегда всё порчу, я ни на что не способна»', k: 'C' }
+      ]
+    },
+    {
+      q: 'Выходной, ты одна. Как проходит день?',
+      opts: [
+        { t: '«Список дел: уборка, готовка, позвонить маме, проверить уроки»', k: 'P' },
+        { t: '«Спросила себя, чего хочу, и выбрала то, что сейчас по ресурсу»', k: 'A' },
+        { t: '«Листаю ленту, откладываю, чувствую вину, что ничего не делаю»', k: 'C' }
+      ]
+    },
+    {
+      q: 'Кто-то просит о помощи, а у тебя нет сил.',
+      opts: [
+        { t: '«Конечно помогу, я же не эгоистка, надо быть полезной»', k: 'P' },
+        { t: '«Скажу честно: сегодня не могу, но могу завтра»', k: 'A' },
+        { t: '«Соглашусь, а потом буду злиться на себя и на него»', k: 'C' }
+      ]
+    },
+    {
+      q: 'Ты смотришь на свою жизнь со стороны. Что видишь?',
+      opts: [
+        { t: '«Я тащу на себе всех, и никто не ценит»', k: 'P' },
+        { t: '«Есть то, что нравится, и то, что хочу изменить, — и я это делаю»', k: 'A' },
+        { t: '«Я потерялась и не знаю, чего хочу на самом деле»', k: 'C' }
+      ]
+    }
+  ];
+
+  var RES = {
+    P: {
+      emoji: '🏔',
+      title: 'Ты несёшь мир на своих плечах',
+      text: 'Внутри тебя звучит голос, который знает, как надо. Ты контролируешь, объясняешь, тащишь — и к вечеру остаёшься одна с усталостью и вопросом «а кто позаботится обо мне?». Этот голос когда-то помог тебе выжить. Но сейчас он забирает твою свободу. Твой Взрослый спрятался за стеной «надо». На сессии мы аккуратно разберём, что из этого — твоё, а что — унаследованное.',
+      quote: '«Перестать тащить чужое и вернуть своё.»'
+    },
+    C: {
+      emoji: '🌧',
+      title: 'Ты ждёшь, пока тебе разрешат быть собой',
+      text: 'Внутри — тревога, ощущение «я недостаточно», страх ошибки. Ты подстраиваешься, молчишь, когда хочется кричать, и чувствуешь вину за свои желания. Это не слабость. Это адаптация, которая когда-то тебя спасла. Но сейчас она мешает тебе жить свою жизнь. Твой Взрослый ждёт, пока ему дадут разрешение. На сессии мы вернём ему голос.',
+      quote: '«Вернуть себе место, голос и право жить свою жизнь.»'
+    },
+    A: {
+      emoji: '🌿',
+      title: 'Ты уже на пути к себе',
+      text: 'Ты умеешь слышать себя, опираться на факты и выбирать. Это большая работа, и ты её уже делаешь. Но даже у самых осознанных бывают моменты, когда включается внутренний Критик или испуганный Ребёнок — и это нормально. Сессия поможет сделать твою взрослую позицию устойчивее, особенно в тех зонах, где пока «упираешься в потолок».',
+      quote: '«Если знаем, как это устроено, значит можем на это влиять.»'
+    },
+    mix: {
+      emoji: '🎭',
+      title: 'Внутри тебя — целая семья',
+      text: 'В разных ситуациях ты переключаешься: то контролируешь, то подстраиваешься, то спокойно решаешь. Это значит, что внутри много энергии и ресурса, но нет устойчивой опоры — и от этого бывает утомительно. На сессии мы познакомим тебя с каждой из этих частей и поможем Взрослому занять своё законное место — не вместо других, а рядом с ними.',
+      quote: '«Расчищаем внутреннее пространство и сажаем семена новых состояний и выборов.»'
+    }
+  };
+
+  /* ========== СОСТОЯНИЕ ========== */
+  var cur = 0;
+  var scores = { P: 0, A: 0, C: 0 };
+  var locked = false;
+  var resultKey = '';
+  var RM = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var ORDER = ['s-intro','s-quiz','s-result'];
+  var dots = document.querySelectorAll('#dots i');
+
+  /* ========== НАВИГАЦИЯ ========== */
+  function goTo(id) {
+    var c = document.querySelector('.screen.active');
+    if (c) c.classList.remove('active');
+    document.getElementById(id).classList.add('active');
+    var idx = ORDER.indexOf(id);
+    dots.forEach(function(d, i) { d.classList.toggle('on', i <= idx); });
+    window.scrollTo(0, 0);
+  }
+  dots[0].classList.add('on');
+
+  /* ========== ПЕРЕМЕШИВАНИЕ ========== */
+  function shuffle(a) {
+    var b = a.slice();
+    for (var i = b.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = b[i]; b[i] = b[j]; b[j] = tmp;
+    }
+    return b;
+  }
+
+  /* ========== РЕНДЕР ВОПРОСА ========== */
+  function renderQ(idx) {
+    var q = Q[idx];
+    document.getElementById('qpNum').textContent = 'вопрос ' + (idx + 1) + ' из ' + Q.length;
+    document.getElementById('qText').textContent = q.q;
+    document.getElementById('qpFill').style.width = ((idx) / Q.length * 100) + '%';
+
+    var box = document.getElementById('qOpts');
+    box.innerHTML = '';
+    var opts = shuffle(q.opts);
+    opts.forEach(function(o) {
+      var btn = document.createElement('button');
+      btn.className = 'q-opt';
+      btn.textContent = o.t;
+      btn.setAttribute('data-k', o.k);
+      btn.addEventListener('click', function() { pick(btn, o.k); });
+      box.appendChild(btn);
+    });
+  }
+
+  /* ========== ВЫБОР ОТВЕТА ========== */
+  function pick(btn, k) {
+    if (locked) return;
+    locked = true;
+    scores[k]++;
+    btn.classList.add('chosen');
+    var all = document.querySelectorAll('.q-opt');
+    all.forEach(function(b) { if (b !== btn) b.classList.add('dim'); });
+
+    var delay = RM ? 100 : 700;
+    setTimeout(function() {
+      cur++;
+      if (cur >= Q.length) {
+        document.getElementById('qpFill').style.width = '100%';
+        setTimeout(showResult, RM ? 100 : 400);
+        return;
+      }
+      var body = document.getElementById('quizBody');
+      body.classList.add('out');
+      setTimeout(function() {
+        renderQ(cur);
+        body.classList.remove('out');
+        locked = false;
+      }, RM ? 50 : 420);
+    }, delay);
+  }
+
+  /* ========== РЕЗУЛЬТАТ ========== */
+  function showResult() {
+    var mx = Math.max(scores.P, scores.A, scores.C);
+    var leaders = [];
+    if (scores.P === mx) leaders.push('P');
+    if (scores.A === mx) leaders.push('A');
+    if (scores.C === mx) leaders.push('C');
+    resultKey = leaders.length === 1 ? leaders[0] : 'mix';
+    var r = RES[resultKey];
+
+    document.getElementById('resEmoji').textContent = r.emoji;
+    document.getElementById('resTitle').textContent = r.title;
+    document.getElementById('resText').textContent = r.text;
+    document.getElementById('resQuote').textContent = r.quote;
+
+    goTo('s-result');
+  }
+
+  /* ========== СТАРТ ========== */
+  document.getElementById('startBtn').addEventListener('click', function() {
+    goTo('s-quiz');
+    renderQ(0);
+  });
+
+  /* ========== ПОДЕЛИТЬСЯ ========== */
+  document.getElementById('shareBtn').addEventListener('click', function() {
+    var labels = { P: 'Родитель 🏔', C: 'Ребёнок 🌧', A: 'Взрослый 🌿', mix: 'вся семья 🎭' };
+    var txt = 'Я прошла квиз «Кто живёт твою жизнь?» и узнала, что внутри доминирует ' +
+              (labels[resultKey] || 'Взрослый') +
+              '. Попробуй тоже: ' + location.href;
+    if (navigator.share) {
+      navigator.share({ title: 'Кто живёт твою жизнь?', text: txt }).catch(function(){});
+    } else {
+      navigator.clipboard.writeText(txt).then(function() {
+        var t = document.getElementById('toast');
+        t.classList.add('show');
+        setTimeout(function() { t.classList.remove('show'); }, 2200);
+      }).catch(function(){});
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
